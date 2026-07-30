@@ -960,10 +960,10 @@
                     normalizedRow.frente = String(row[4] !== undefined ? row[4] : '').trim();
                     normalizedRow.cod_equip = String(row[5] !== undefined ? row[5] : '').trim();
                     normalizedRow.mod_equip = String(row[6] !== undefined ? row[6] : '').trim();
-                    // Divide weight in Kilos by 1000 to convert to Tons
-                    normalizedRow.tc = (parseFloat(String(row[7] !== undefined ? row[7] : '').replace(',', '.')) || 0) / 1000;
+                    // Import weight and weight/load directly (no division)
+                    normalizedRow.tc = parseFloat(String(row[7] !== undefined ? row[7] : '').replace(',', '.')) || 0;
                     normalizedRow.cargas = parseInt(row[8] !== undefined ? row[8] : 0, 10) || 0;
-                    normalizedRow.tc_c = (parseFloat(String(row[9] !== undefined ? row[9] : '').replace(',', '.')) || 0) / 1000;
+                    normalizedRow.tc_c = parseFloat(String(row[9] !== undefined ? row[9] : '').replace(',', '.')) || 0;
                 } else {
                     // Fallback to object matching if row is already mapped
                     const keys = Object.keys(row);
@@ -983,7 +983,6 @@
                         let val = mappedKey ? row[mappedKey] : '';
                         if (col.type === 'float' || col.type === 'float-computed') {
                             val = parseFloat(String(val).replace(',', '.')) || 0;
-                            if (col.id === 'tc' || col.id === 'tc_c') val = val / 1000; // convert kilos to tons
                         } else if (col.type === 'integer') {
                             val = parseInt(val, 10) || 0;
                         } else {
