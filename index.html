@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferência de Entrada de Cana</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS for Excel Reading/Writing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- html2canvas for Image Generation/Copying -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(22, 28, 45, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-orange: #f59e0b;
+            --table-header: rgba(30, 41, 59, 0.8);
+            --table-row-hover: rgba(255, 255, 255, 0.03);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --primary-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            --glass-blur: blur(16px);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-green: #059669;
+            --accent-green-glow: rgba(5, 150, 105, 0.1);
+            --accent-blue: #2563eb;
+            --accent-orange: #d97706;
+            --table-header: rgba(241, 245, 249, 0.9);
+            --table-row-hover: rgba(0, 0, 0, 0.02);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --primary-gradient: linear-gradient(135deg, #047857 0%, #059669 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-bottom: 2rem;
+        }
+
+        /* Background grid effect */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header Style */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 2.25rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.3));
+        }
+
+        .title-area h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .title-area p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .theme-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Top Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .card-title i {
+            color: var(--accent-green);
+        }
+
+        /* Upload Drag & Drop Area */
+        .upload-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 0.75rem;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.01);
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent-green);
+            background: var(--accent-green-glow);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-template {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-template:hover {
+            background: var(--accent-green);
+            color: #fff;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .kpi-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .kpi-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .kpi-icon.orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .kpi-info h3 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        /* Columns Selector Grid */
+        .column-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .column-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            font-size: 0.875rem;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .column-checkbox-label input {
+            accent-color: var(--accent-green);
+            width: 16px;
+            height: 16px;
+        }
+
+        .column-checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-green);
+        }
+
+        .column-checkbox-label.active {
+            border-color: var(--accent-green);
+            background: var(--accent-green-glow);
+        }
+
+        /* Tabs & Actions Bar */
+        .workspace-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .workspace-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        /* Segmented Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--card-border);
+            width: fit-content;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Filter Controls */
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .select-filter {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .select-filter:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Blinking Red Row Alerts for Invalid Cost Centers */
+        @keyframes blink-red {
+            0% { background-color: rgba(239, 68, 68, 0.08); }
+            50% { background-color: rgba(239, 68, 68, 0.28); }
+            100% { background-color: rgba(239, 68, 68, 0.08); }
+        }
+
+        .row-alert {
+            animation: blink-red 2s infinite ease-in-out;
+        }
+
+        .row-alert td {
+            color: #fca5a5 !important;
+            font-weight: 500;
+        }
+
+        /* Responsive Table styling */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid var(--card-border);
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: var(--table-header);
+            color: var(--text-primary);
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        th .sort-icon {
+            margin-left: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: var(--table-row-hover);
+        }
+
+        /* Badges for categories */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-colhedora {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-transbordo {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .badge-canavieiro {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--card-border);
+            margin-bottom: 1rem;
+        }
+
+        /* Pagination & Footer summary */
+        .table-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (min-width: 640px) {
+            .table-footer {
+                flex-direction: row;
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent-green);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+        }
+
+        /* Printing Optimizations */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .glass-card, .workspace-controls, .theme-btn, .action-buttons, .table-footer, .bg-grid {
+                display: none !important;
+            }
+            .table-container {
+                border: none;
+                overflow: visible;
+            }
+            table {
+                font-size: 10pt;
+                width: 100%;
+            }
+            th, td {
+                border: 1px solid #ddd !important;
+                padding: 6px !important;
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <div class="container">
+        
+        <header>
+            <div class="logo-area">
+                <i class="fa-solid fa-leaf logo-icon"></i>
+                <div class="title-area">
+                    <h1>CanaConf</h1>
+                    <p>Controle de Conferência de Entrada de Cana (Toneladas)</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+                
+                <button class="btn btn-secondary" id="downloadTemplate" style="padding: 0.5rem 1rem; font-size: 0.85rem; height: 38px; display: inline-flex; align-items: center; gap: 0.5rem;" title="Baixar planilha modelo">
+                    <i class="fa-solid fa-download"></i> Modelo
+                </button>
+
+                <button class="theme-btn" id="themeToggle" title="Alternar tema" style="width: 38px; height: 38px; border-radius: 50%;">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace: Single Full-width Panel -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Category Tabs (Moved above KPIs and removed "Todos") -->
+            <div class="tabs" style="align-self: flex-start; margin-bottom: 0.5rem;">
+                <button class="tab-btn active" data-category="COLHEDORA">Colhedoras</button>
+                <button class="tab-btn" data-category="TRANSBORDO">Transbordo</button>
+                <button class="tab-btn" data-category="CANAVIEIRO">Canavieiros</button>
+            </div>
+            
+            <!-- KPIs Row -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon green">
+                        <i class="fa-solid fa-weight-hanging"></i>
+                    </div>
+                    <div class="kpi-info">
+                        <h3>Total Toneladas (TC)</h3>
+                        <div class="kpi-value" id="kpiTotalTC">0,00</div>
+                    </div>
+                </div>
+                 <div class="kpi-card">
+                     <div class="kpi-icon blue">
+                         <i class="fa-solid fa-truck-ramp-box"></i>
+                     </div>
+                     <div class="kpi-info">
+                         <h3 id="kpiTitleEquip">Quantidade de Caminhão</h3>
+                         <div class="kpi-value" id="kpiTotalCaminhoes">0</div>
+                     </div>
+                 </div>
+                 <div class="kpi-card">
+                     <div class="kpi-icon orange">
+                         <i class="fa-solid fa-gauge-high"></i>
+                     </div>
+                     <div class="kpi-info">
+                         <h3>Média TC/Carga</h3>
+                         <div class="kpi-value" id="kpiAvgTCC">0,00</div>
+                     </div>
+                 </div>
+                 <div class="kpi-card">
+                      <div class="kpi-icon orange" style="color: var(--accent-blue); background: rgba(59,130,246,0.02);">
+                          <i class="fa-solid fa-calculator" style="color: var(--accent-blue);"></i>
+                      </div>
+                      <div class="kpi-info">
+                          <h3 id="kpiTitleTMD">Média TMD (TC/Caminhão >= 4 Cargas)</h3>
+                          <div class="kpi-value">
+                              <span id="kpiTMD">0,00</span>
+                              <span id="kpiTMDCount" style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-left: 0.25rem;">(0 caminhões)</span>
+                          </div>
+                      </div>
+                  </div>
+            </div>
+
+            <!-- Table Workspace Card (Glass) -->
+            <div class="glass-card">
+                
+                <div class="workspace-controls">
+
+
+                    <!-- Filters -->
+                    <div class="filters">
+                        <div class="search-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar prestador, equip...">
+                        </div>
+                        
+                        <select id="filterCentroCusto" class="select-filter">
+                            <option value="">Todos Centros</option>
+                        </select>
+
+                        <select id="filterFrente" class="select-filter">
+                            <option value="">Todas Frentes</option>
+                        </select>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" id="btnImport" style="display: inline-flex; align-items: center; gap: 0.5rem;" onclick="document.getElementById('fileInput').click()">
+                                <i class="fa-solid fa-file-excel" style="color: var(--accent-green);"></i> Importar Colhedoras
+                            </button>
+                            <button class="btn btn-primary" id="btnReportType" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-file-invoice"></i> Relatório: Centro de Custo
+                            </button>
+                            <button class="btn btn-secondary" id="btnClipboard" disabled style="display: inline-flex; align-items: center; gap: 0.5rem;" title="Copiar tabela para colar no Excel">
+                                <i class="fa-solid fa-copy"></i> Print Scr (Copiar)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Table -->
+                <div class="table-container">
+                    <table id="mainTable">
+                        <thead>
+                            <tr id="tableHeaderRow">
+                                <!-- Dynamic Headers -->
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="emptyState">
+                        <i class="fa-solid fa-file-import"></i>
+                        <p>Nenhum dado importado. Clique em "Importar Excel" no cabeçalho para começar.</p>
+                    </div>
+                </div>
+
+                    <!-- Footer / Pagination -->
+                    <div class="table-footer" id="tableFooter" style="display: none;">
+                        <span style="font-size: 0.875rem; color: var(--text-secondary);" id="rowsCount">
+                            Mostrando 0 de 0 registros
+                        </span>
+                        <div class="pagination" id="paginationControls">
+                            <!-- Dynamic buttons -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // --- Data Model Definitions & Columns ---
+        const COLUMN_DEFS = [
+            { id: 'categoria', label: 'Categoria', default: true, type: 'badge' },
+            { id: 'cod_prest', label: 'Cod. Prest.', default: true, type: 'number' },
+            { id: 'prestador', label: 'Prestador Serviço', default: true, type: 'text' },
+            { id: 'centro_custo', label: 'Cod. Centro Custo', default: true, type: 'text' },
+            { id: 'frente', label: 'Frente', default: true, type: 'text' },
+            { id: 'cod_equip', label: 'Cod. Equipamento', default: true, type: 'text' },
+            { id: 'mod_equip', label: 'Mod. Equipamento', default: true, type: 'text' },
+            { id: 'tc', label: 'TC (Ton)', default: true, type: 'float' },
+            { id: 'cargas', label: 'Cargas', default: true, type: 'integer' },
+            { id: 'tc_c', label: 'TC/C', default: true, type: 'float-computed' }
+        ];
+
+        // Column mapping vocabulary (fuzzy dictionary matching)
+        const HEADER_MAP = {
+            'categoria': ['categoria', 'cat', 'tipo'],
+            'cod_prest': ['codigo prest.', 'cod prest', 'cod_prest', 'prestador cod', 'codigo prestador'],
+            'prestador': ['prestador serviço', 'prestador', 'nome prestador', 'prestador_servico'],
+            'centro_custo': ['cod.centro custo', 'centro custo', 'cod. cc', 'cc', 'centro_custo', 'cod centro custo'],
+            'frente': ['frente', 'frente colheita', 'frente_colheita'],
+            'cod_equip': ['cod.equipamento', 'equipamento', 'cod equip', 'cod_equipamento', 'prefixo'],
+            'mod_equip': ['mod.equipamento', 'modelo', 'modelo equipamento', 'mod_equipamento'],
+            'tc': ['tc', 'toneladas', 't.c.', 'ton', 'peso_liquido'],
+            'cargas': ['cargas', 'viagens', 'cargas total', 'qtd_cargas'],
+            'tc_c': ['tc/c', 'tc/carga', 'tc_c', 'media tc/c']
+        };
+
+        // Application State
+        let importedData = [];
+        let filteredData = [];
+        let visibleColumns = COLUMN_DEFS.map(c => c.id); // All columns visible by default
+        let currentCategoryTab = 'COLHEDORA';
+        let reportType = 'centro_custo'; // 'centro_custo' ou 'frente'
+        let sortConfig = { key: null, direction: 'asc' };
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        // Elements Cache
+        const fileInput = document.getElementById('fileInput');
+        const kpiTotalTC = document.getElementById('kpiTotalTC');
+        const kpiTotalCaminhoes = document.getElementById('kpiTotalCaminhoes');
+        const kpiAvgTCC = document.getElementById('kpiAvgTCC');
+        const searchInput = document.getElementById('searchInput');
+        const filterCentroCusto = document.getElementById('filterCentroCusto');
+        const filterFrente = document.getElementById('filterFrente');
+        const btnReportType = document.getElementById('btnReportType');
+        const btnClipboard = document.getElementById('btnClipboard');
+        const mainTable = document.getElementById('mainTable');
+        const tableHeaderRow = document.getElementById('tableHeaderRow');
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const tableFooter = document.getElementById('tableFooter');
+        const rowsCount = document.getElementById('rowsCount');
+        const paginationControls = document.getElementById('paginationControls');
+        const downloadTemplate = document.getElementById('downloadTemplate');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // --- Theme Switcher ---
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        });
+
+        // --- File Upload Event Listener ---
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+
+        // --- File Processing (SheetJS) ---
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                    
+                    if (json.length === 0) {
+                        alert('A planilha importada está vazia.');
+                        return;
+                    }
+                    
+                    parseExcelData(json);
+                } catch (err) {
+                    console.error(err);
+                    alert('Erro ao processar o arquivo Excel. Verifique a estrutura.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Parse and normalize raw Excel rows
+        function parseExcelData(rawRows) {
+            // Check if first row is a header
+            let startIndex = 0;
+            if (rawRows.length > 0 && Array.isArray(rawRows[0])) {
+                const firstCell = String(rawRows[0][0]).trim().toLowerCase();
+                // If it looks like a header label rather than a raw numeric code, skip it
+                if (isNaN(firstCell) || firstCell.includes('prest') || firstCell.includes('cód') || firstCell.includes('cod')) {
+                    startIndex = 1;
+                }
+            }
+
+            // Remove apenas os dados anteriores da categoria da aba ativa (acumula entre abas)
+            importedData = importedData.filter(row => row.categoria !== currentCategoryTab);
+            
+            for (let i = startIndex; i < rawRows.length; i++) {
+                const row = rawRows[i];
+                if (!row || (Array.isArray(row) && row.length === 0)) continue;
+
+                const normalizedRow = {
+                    categoria: currentCategoryTab, // Força a categoria da aba atual no registro
+                    cod_prest: '',
+                    prestador: '',
+                    centro_custo: '',
+                    frente: '',
+                    cod_equip: '',
+                    mod_equip: '',
+                    tc: 0,
+                    cargas: 0,
+                    tc_c: 0
+                };
+
+                if (Array.isArray(row)) {
+                    // Strict column mapping by index (A=0, B=1, C=2, D=3[Category], E=4, F=5, G=6, H=7, I=8, J=9)
+                    normalizedRow.cod_prest = String(row[0] !== undefined ? row[0] : '').trim();
+                    normalizedRow.prestador = String(row[1] !== undefined ? row[1] : '').trim();
+                    normalizedRow.centro_custo = String(row[2] !== undefined ? row[2] : '').trim();
+                    normalizedRow.frente = String(row[4] !== undefined ? row[4] : '').trim();
+                    normalizedRow.cod_equip = String(row[5] !== undefined ? row[5] : '').trim();
+                    normalizedRow.mod_equip = String(row[6] !== undefined ? row[6] : '').trim();
+                    // Divide weight in Kilos by 1000 to convert to Tons
+                    normalizedRow.tc = (parseFloat(String(row[7] !== undefined ? row[7] : '').replace(',', '.')) || 0) / 1000;
+                    normalizedRow.cargas = parseInt(row[8] !== undefined ? row[8] : 0, 10) || 0;
+                    normalizedRow.tc_c = (parseFloat(String(row[9] !== undefined ? row[9] : '').replace(',', '.')) || 0) / 1000;
+                } else {
+                    // Fallback to object matching if row is already mapped
+                    const keys = Object.keys(row);
+                    const mapping = {};
+                    COLUMN_DEFS.forEach(col => {
+                        const targetOptions = HEADER_MAP[col.id] || [];
+                        const matchedKey = keys.find(key => {
+                            const normalizedKey = key.trim().toLowerCase();
+                            return targetOptions.some(opt => normalizedKey.includes(opt));
+                        });
+                        if (matchedKey) mapping[col.id] = matchedKey;
+                    });
+
+                    COLUMN_DEFS.forEach(col => {
+                        if (col.id === 'categoria') return; // Forçado para currentCategoryTab
+                        const mappedKey = mapping[col.id];
+                        let val = mappedKey ? row[mappedKey] : '';
+                        if (col.type === 'float' || col.type === 'float-computed') {
+                            val = parseFloat(String(val).replace(',', '.')) || 0;
+                            if (col.id === 'tc' || col.id === 'tc_c') val = val / 1000; // convert kilos to tons
+                        } else if (col.type === 'integer') {
+                            val = parseInt(val, 10) || 0;
+                        } else {
+                            val = String(val).trim();
+                        }
+                        normalizedRow[col.id] = val;
+                    });
+                }
+
+                // Auto compute TC or TC/C if one of them is missing/zero (in Tons)
+                if ((!normalizedRow.tc || normalizedRow.tc < 0.1) && normalizedRow.tc_c > 0 && normalizedRow.cargas > 0) {
+                    normalizedRow.tc = normalizedRow.tc_c * normalizedRow.cargas;
+                } else if (normalizedRow.cargas > 0 && (!normalizedRow.tc_c || normalizedRow.tc_c === 0)) {
+                    normalizedRow.tc_c = normalizedRow.tc / normalizedRow.cargas;
+                }
+
+                // Import only rows that have all essential fields complete
+                const isComplete = 
+                    normalizedRow.cod_prest !== '' &&
+                    normalizedRow.prestador !== '' &&
+                    normalizedRow.centro_custo !== '' &&
+                    normalizedRow.cod_equip !== '' &&
+                    normalizedRow.tc > 0 &&
+                    (normalizedRow.categoria === 'CANAVIEIRO' ? (normalizedRow.cargas > 0) : true);
+
+                if (isComplete) {
+                    importedData.push(normalizedRow);
+                }
+            }
+
+            // Populate Filter dropdowns
+            populateDropdownFilters();
+
+            // Refresh UI
+            applyFilters();
+        }
+
+        // Populates unique values inside selection dropdowns
+        function populateDropdownFilters() {
+            const ccList = new Set();
+            const frenteList = new Set();
+
+            importedData.forEach(row => {
+                if (row.centro_custo) ccList.add(row.centro_custo);
+                if (row.frente) frenteList.add(row.frente);
+            });
+
+            // Build CC filter options
+            filterCentroCusto.innerHTML = '<option value="">Todos Centros</option>';
+            Array.from(ccList).sort().forEach(cc => {
+                filterCentroCusto.innerHTML += `<option value="${cc}">${cc}</option>`;
+            });
+
+            // Build Frente filter options
+            filterFrente.innerHTML = '<option value="">Todas Frentes</option>';
+            Array.from(frenteList).sort().forEach(f => {
+                filterFrente.innerHTML += `<option value="${f}">${f}</option>`;
+            });
+        }
+
+        // --- Filter, Sort, Paginate Logic ---
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const ccFilter = filterCentroCusto.value;
+            const frenteFilter = filterFrente.value;
+
+            // 1. Initial base filtering
+            let baseFiltered = importedData.filter(row => {
+                // Tab category filter
+                if (currentCategoryTab !== 'ALL' && row.categoria !== currentCategoryTab) return false;
+                
+                // Dropdown Filters
+                if (ccFilter && row.centro_custo !== ccFilter) return false;
+                if (frenteFilter && row.frente !== frenteFilter) return false;
+
+                // Search string match
+                if (search) {
+                    const matchText = `${row.prestador} ${row.cod_equip} ${row.mod_equip} ${row.centro_custo}`.toLowerCase();
+                    if (!matchText.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            // 2. Apply grouping only for CANAVIEIRO tab (removing 'frente' detail)
+            if (currentCategoryTab === 'CANAVIEIRO') {
+                const grouped = {};
+                baseFiltered.forEach(row => {
+                    // Grouping keys: cod_prest + prestador + centro_custo + cod_equip + mod_equip
+                    const key = `${row.cod_prest}_${row.prestador}_${row.centro_custo}_${row.cod_equip}_${row.mod_equip}`;
+                    if (!grouped[key]) {
+                        grouped[key] = {
+                            categoria: 'CANAVIEIRO',
+                            cod_prest: row.cod_prest,
+                            prestador: row.prestador,
+                            centro_custo: row.centro_custo,
+                            frente: '', // Excluded/Blanked
+                            cod_equip: row.cod_equip,
+                            mod_equip: row.mod_equip,
+                            tc: 0,
+                            cargas: 0,
+                            tc_c: 0
+                        };
+                    }
+                    grouped[key].tc += row.tc;
+                    grouped[key].cargas += row.cargas;
+                });
+
+                // Convert grouped objects back to array and recalculate TC/C
+                filteredData = Object.values(grouped).map(row => {
+                    if (row.cargas > 0) {
+                        row.tc_c = row.tc / row.cargas;
+                    }
+                    return row;
+                });
+            } else {
+                filteredData = baseFiltered;
+            }
+
+            currentPage = 1;
+            updateKPIs();
+            renderTable();
+
+            // Ativa/desativa botões conforme presença de dados na aba ativa
+            const hasData = filteredData.length > 0;
+            if (btnReportType) {
+                btnReportType.disabled = !hasData;
+            }
+            btnClipboard.disabled = !hasData;
+        }
+
+        // Events for search/filtering
+        searchInput.addEventListener('input', applyFilters);
+        filterCentroCusto.addEventListener('change', applyFilters);
+        filterFrente.addEventListener('change', applyFilters);
+
+        // Tab switches
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategoryTab = btn.getAttribute('data-category');
+
+                // Renomeia o botão de importação dinamicamente conforme a aba selecionada
+                const btnImport = document.getElementById('btnImport');
+                if (btnImport) {
+                    let label = 'Colhedoras';
+                    if (currentCategoryTab === 'TRANSBORDO') label = 'Transbordo';
+                    if (currentCategoryTab === 'CANAVIEIRO') label = 'Canavieiros';
+                    btnImport.innerHTML = `<i class="fa-solid fa-file-excel" style="color: var(--accent-green);"></i> Importar ${label}`;
+                }
+
+                // Oculta o botão de relatório na aba CANAVIEIRO, exibe nas demais
+                if (btnReportType) {
+                    if (currentCategoryTab === 'CANAVIEIRO') {
+                        btnReportType.style.display = 'none';
+                    } else {
+                        btnReportType.style.display = 'inline-flex';
+                    }
+                }
+
+                applyFilters();
+            });
+        });
+
+        // Sorting
+        function handleSort(colId) {
+            if (sortConfig.key === colId) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = colId;
+                sortConfig.direction = 'asc';
+            }
+            
+            filteredData.sort((a, b) => {
+                let valA = a[colId];
+                let valB = b[colId];
+
+                // handle numeric sorting
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+                }
+
+                // string case insensitive
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTable();
+        }
+
+        // Dynamic KPI updates
+        function updateKPIs() {
+            let totalTC = 0;
+            let totalCargas = 0;
+            
+            // Unique equipment sets for active category
+            const uniqueEquips = new Set();
+            const tmdEquips = new Set();
+            let tmdTC = 0;
+            
+            filteredData.forEach(row => {
+                totalTC += row.tc;
+                totalCargas += row.cargas;
+
+                // Track unique equipment of the active category
+                if (row.cod_equip) {
+                    uniqueEquips.add(row.cod_equip);
+                }
+
+                // TMD calculation: only consider equipment with cargas >= 4 and exclude "DOMINGOS DE PIETRO E OUTROS"
+                const isExcludedPrestador = row.prestador.trim().toUpperCase() === 'DOMINGOS DE PIETRO E OUTROS';
+                if (row.cargas >= 4 && !isExcludedPrestador) {
+                    tmdTC += row.tc;
+                    if (row.cod_equip) {
+                        tmdEquips.add(row.cod_equip);
+                    }
+                }
+            });
+
+            const avgTCC = totalCargas > 0 ? (totalTC / totalCargas) : 0;
+            const tmdValue = tmdEquips.size > 0 ? (tmdTC / tmdEquips.size) : 0;
+
+            // Dynamic labels based on category tab
+            let labelSingular = 'Equipamento';
+            let labelPlural = 'equipamentos';
+            if (currentCategoryTab === 'COLHEDORA') {
+                labelSingular = 'Colhedora';
+                labelPlural = 'colhedoras';
+            } else if (currentCategoryTab === 'TRANSBORDO') {
+                labelSingular = 'Transbordo';
+                labelPlural = 'transbordos';
+            } else if (currentCategoryTab === 'CANAVIEIRO') {
+                labelSingular = 'Caminhão';
+                labelPlural = 'caminhões';
+            }
+
+            // Formatter helper
+            const numFormatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            kpiTotalTC.innerText = numFormatter.format(totalTC);
+            kpiTotalCaminhoes.innerText = uniqueEquips.size.toLocaleString('pt-BR');
+            kpiAvgTCC.innerText = numFormatter.format(avgTCC);
+
+            // Dynamic titles & counts
+            const kpiTitleEquip = document.getElementById('kpiTitleEquip');
+            if (kpiTitleEquip) {
+                kpiTitleEquip.innerText = `Quantidade de ${labelSingular}`;
+            }
+
+            const kpiTitleTMD = document.getElementById('kpiTitleTMD');
+            if (kpiTitleTMD) {
+                kpiTitleTMD.innerText = `Média TMD (TC/${labelSingular} >= 4 Cargas)`;
+            }
+            
+            const kpiTMD = document.getElementById('kpiTMD');
+            const kpiTMDCount = document.getElementById('kpiTMDCount');
+            if (kpiTMD) {
+                kpiTMD.innerText = numFormatter.format(tmdValue);
+            }
+            if (kpiTMDCount) {
+                kpiTMDCount.innerText = `(${tmdEquips.size} ${labelPlural})`;
+            }
+        }
+
+        // Render table DOM element
+        function renderTable() {
+            // Header rendering
+            tableHeaderRow.innerHTML = '';
+            
+            // Controle dinâmico de colunas visíveis por tipo de relatório e aba
+            if (currentCategoryTab === 'CANAVIEIRO') {
+                visibleColumns = COLUMN_DEFS.filter(c => c.id !== 'frente').map(c => c.id);
+            } else {
+                if (reportType === 'frente') {
+                    // Oculta "Cod. Centro Custo"
+                    visibleColumns = COLUMN_DEFS.filter(c => c.id !== 'centro_custo').map(c => c.id);
+                } else {
+                    // Centro de custo: Exibe todas as colunas
+                    visibleColumns = COLUMN_DEFS.map(c => c.id);
+                }
+            }
+
+            visibleColumns.forEach(colId => {
+                const colDef = COLUMN_DEFS.find(c => c.id === colId);
+                const th = document.createElement('th');
+                th.innerHTML = `${colDef.label} <i class="fa-solid fa-sort sort-icon"></i>`;
+                
+                if (sortConfig.key === colId) {
+                    const arrow = sortConfig.direction === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+                    th.innerHTML = `${colDef.label} <i class="fa-solid ${arrow} sort-icon" style="color: var(--accent-green);"></i>`;
+                }
+
+                th.addEventListener('click', () => handleSort(colId));
+                tableHeaderRow.appendChild(th);
+            });
+
+            // Table body rows rendering
+            tableBody.innerHTML = '';
+            
+            if (filteredData.length === 0) {
+                emptyState.style.display = 'block';
+                tableFooter.style.display = 'none';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+                tableFooter.style.display = 'flex';
+            }
+
+            // Render all rows for single-view and clean printing/screenshots
+            const pageRows = filteredData;
+            const numFormatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            pageRows.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Validação de Centro de Custo e Prestador de Serviço
+                const allowedCentros = ['1110052014', '1110052020', '110052002', '110052011', '1110192001', '1110052003', '1110052011', '1110052002'];
+                const allowedPrests = ['4100116', '11', '4101101', '3001159'];
+                
+                const isCCInvalid = !allowedCentros.includes(row.centro_custo.trim());
+                const isPrestInvalid = !allowedPrests.includes(row.cod_prest.trim());
+
+                if (isCCInvalid || isPrestInvalid) {
+                    tr.classList.add('row-alert');
+                    let alerts = [];
+                    if (isCCInvalid) alerts.push(`Centro de Custo "${row.centro_custo}"`);
+                    if (isPrestInvalid) alerts.push(`Prestador "${row.cod_prest}"`);
+                    tr.title = `Alerta: ${alerts.join(' e ')} não reconhecido(s)!`;
+                }
+
+                visibleColumns.forEach(colId => {
+                    const colDef = COLUMN_DEFS.find(c => c.id === colId);
+                    const td = document.createElement('td');
+                    let cellVal = row[colId];
+
+                    if (colDef.type === 'badge') {
+                        const cleanBadgeClass = `badge-${cellVal.toLowerCase()}`;
+                        td.innerHTML = `<span class="badge ${cleanBadgeClass}">${cellVal}</span>`;
+                    } else if (colDef.type === 'float' || colDef.type === 'float-computed') {
+                        td.innerText = numFormatter.format(cellVal);
+                        td.style.textAlign = 'right';
+                    } else if (colDef.type === 'integer') {
+                        td.innerText = cellVal.toLocaleString('pt-BR');
+                        td.style.textAlign = 'right';
+                    } else {
+                        td.innerText = cellVal;
+                    }
+
+                    tr.appendChild(td);
+                });
+                
+                tableBody.appendChild(tr);
+            });
+
+            // Footer metadata
+            rowsCount.innerText = `Total de ${filteredData.length} registros`;
+        }
+
+        // --- Report Type Switcher ---
+        btnReportType.addEventListener('click', () => {
+            if (reportType === 'centro_custo') {
+                reportType = 'frente';
+                btnReportType.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Relatório: Frentes';
+            } else {
+                reportType = 'centro_custo';
+                btnReportType.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Relatório: Centro de Custo';
+            }
+            renderTable();
+        });
+
+        // --- Copy & Print ---
+        btnClipboard.addEventListener('click', () => {
+            if (filteredData.length === 0) return;
+
+            // Feedback visual de carregamento
+            const originalHTML = btnClipboard.innerHTML;
+            btnClipboard.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
+            btnClipboard.disabled = true;
+
+            const tableElement = document.getElementById('mainTable');
+            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const bgColor = theme === 'dark' ? '#161c2d' : '#ffffff';
+
+            html2canvas(tableElement, {
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: bgColor,
+                scale: 2 // Alta resolução
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item])
+                            .then(() => {
+                                alert('Imagem da tabela completa copiada para a área de transferência! Use Ctrl+V para colar no WhatsApp, e-mail ou documentos.');
+                            })
+                            .catch(err => {
+                                console.error('Erro ao copiar imagem para clipboard: ', err);
+                                downloadCanvas(canvas);
+                            });
+                    } else {
+                        downloadCanvas(canvas);
+                    }
+                    
+                    btnClipboard.innerHTML = originalHTML;
+                    btnClipboard.disabled = false;
+                }, 'image/png');
+            }).catch(err => {
+                console.error('Erro ao processar imagem da tabela: ', err);
+                alert('Erro ao gerar imagem da tabela.');
+                btnClipboard.innerHTML = originalHTML;
+                btnClipboard.disabled = false;
+            });
+        });
+
+        function downloadCanvas(canvas) {
+            const link = document.createElement('a');
+            link.download = `tabela_conferencia_${new Date().toISOString().slice(0,10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('Não foi possível copiar a imagem diretamente para a área de transferência. A imagem foi baixada automaticamente como arquivo.');
+        }
+
+        // --- Demo Template Generator ---
+        downloadTemplate.addEventListener('click', () => {
+            const headers = [
+                'Cod. Prest.',      // A
+                'Prestador Serviço', // B
+                'Cod. Centro Custo',// C
+                '',                 // D (Ignorada/Vazia)
+                'Frente',           // E
+                'Cod. Equipamento', // F
+                'Mod. Equipamento', // G
+                'TC (Ton)',         // H
+                'Cargas',           // I
+                'TC/C'              // J
+            ];
+            const sampleData = [
+                headers,
+                [101, 'Prestador Cana Verde LTDA', '1110052014', 'COLHEDORA', 'FRENTE LESTE', '200117', 'John Deere 3520', 420.50, 20, 21.03],
+                [101, 'Prestador Cana Verde LTDA', '1110052014', 'COLHEDORA', 'FRENTE LESTE', '200141', 'John Deere 3520', 380.20, 18, 21.12],
+                [102, 'TransCana Transportes S/A', '1110052002', 'TRANSBORDO', 'FRENTE OESTE', 'TRA-05', 'Muller Deca-4', 210.45, 15, 14.03],
+                [101, 'Prestador Cana Verde LTDA', '1110052014', 'TRANSBORDO', 'FRENTE LESTE', 'TRA-01', 'Muller Deca-4', 180.30, 12, 15.03],
+                [103, 'LogSugarcane S/A', '1110052003', 'CANAVIEIRO', 'FRENTE SUL', 'CAN-44', 'Volvo FH 540', 650.00, 13, 50.00],
+                [103, 'LogSugarcane S/A', '1110052003', 'CANAVIEIRO', 'FRENTE SUL', 'CAN-45', 'Volvo FH 540', 700.10, 14, 50.01]
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(sampleData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Modelo Entrada Cana");
+            XLSX.writeFile(wb, "modelo_entrada_cana.xlsx");
+        });
+    </script>
+</body>
+</html>
